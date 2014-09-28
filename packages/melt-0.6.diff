@@ -1,0 +1,525 @@
+diff --git a/sxpipe-light/pctabr b/sxpipe-light/pctabr
+index 4f89fda..384e918 100644
+--- a/sxpipe-light/pctabr
++++ b/sxpipe-light/pctabr
+@@ -1,6 +1,6 @@
+ xxxxxxxxxxxx.
+ inf..
+-préc..
++prÃ©c..
+ sq..
+ sqq..
+ suiv..
+@@ -15,10 +15,10 @@ id..
+ loc. cit.
+ op. cit..
+ q.e.d..
+-une médaille d'argent aux J.O.
+-une médaille d'or aux J.O.
+-une médaille de bronze aux J.O.
+-c.-à.-d.
++une mÃ©daille d'argent aux J.O.
++une mÃ©daille d'or aux J.O.
++une mÃ©daille de bronze aux J.O.
++c.-Ã .-d.
+ i.e.
+ O.K..
+ B.D
+@@ -37,7 +37,7 @@ S.A.R.L.
+ S.F..
+ S.O.S..
+ Tel..
+-Tél..
++TÃ©l..
+ adj..
+ adv..
+ art.
+@@ -51,7 +51,7 @@ coll.
+ collec.
+ dept.
+ dir.
+-dép.
++dÃ©p.
+ ex..
+ fasc.
+ fig.
+@@ -68,8 +68,8 @@ p.-s..
+ paragr.
+ pl..
+ pp.
+-réf..
+-rééd.
++rÃ©f..
++rÃ©Ã©d.
+ s.f
+ s.f..
+ sp..
+@@ -77,15 +77,15 @@ spp..
+ t.
+ tel..
+ trad..
+-tél..
++tÃ©l..
+ v.
+ v.
+ var.
+ vol.
+ zool..
+-éd.
+-édit..
+-étym..
++Ã©d.
++Ã©dit..
++Ã©tym..
+ Ch.
+ George W. Bush
+ J.-C
+diff --git a/sxpipe-light/segmenteur.pl b/sxpipe-light/segmenteur.pl
+index 7645784..1cd7186 100755
+--- a/sxpipe-light/segmenteur.pl
++++ b/sxpipe-light/segmenteur.pl
+@@ -2,34 +2,35 @@
+ # $Id: segmenteur.pl 2917 2009-12-22 17:20:55Z sagot $
+ 
+ 
+-# Principe général
++# Principe gÃ©nÃ©ral
+ # ----------------
+ 
+-# On procède en deux temps
+-# 1. tokenisation (on insère ou supprime des blancs:
+-#    à l'issue, un blanc est une frontière de tokens)
++# On procÃ¨de en deux temps
++# 1. tokenisation (on insÃ¨re ou supprime des blancs:
++#    Ã  l'issue, un blanc est une frontiÃ¨re de tokens)
+ #    Ceci n'est pas fait si -no_sw
+-# 2. segmentation (les tokens constitués de points ou 
+-#    d'autres ponctuations sont susceptibles d'être des 
+-#    frontières de phrases
++# 2. segmentation (les tokens constituÃ©s de points ou 
++#    d'autres ponctuations sont susceptibles d'Ãªtre des 
++#    frontiÃ¨res de phrases
+ # L'option -no_s permet de ne faire que la partie 1 
+-# (les frontières de phrases restent de simples blancs)
++# (les frontiÃ¨res de phrases restent de simples blancs)
+ 
+-# Spécificités:
+-# - on utilise le fichier passé en paramètres (-af=xxx) 
++# SpÃ©cificitÃ©s:
++# - on utilise le fichier passÃ© en paramÃ¨tres (-af=xxx) 
+ #   pour ne pas traiter comme un cas normal les points 
+-#   terminant des abréviations connues
+-# - on essaye d'être fin sur les points frontières de 
++#   terminant des abrÃ©viations connues
++# - on essaye d'Ãªtre fin sur les points frontiÃ¨res de 
+ #   phrases et les autres
+-# - on essaye de ne pas mettre de frontière de phrase 
+-#   au milieu d'une citation bien balancée
+-# - l'option -p=[rp] permet de privilégier le rappel 
+-#   (les phrases peuvent sans problème commencer par 
+-#   une minuscule) ou la précision (les phrases ne 
++# - on essaye de ne pas mettre de frontiÃ¨re de phrase 
++#   au milieu d'une citation bien balancÃ©e
++# - l'option -p=[rp] permet de privilÃ©gier le rappel 
++#   (les phrases peuvent sans problÃ¨me commencer par 
++#   une minuscule) ou la prÃ©cision (les phrases ne 
+ #   commencent pas par une minuscule)
+ 
+-
+-
++use utf8;
++use warnings qw( FATAL utf8 );
++use open qw( :encoding(UTF-8) :std );
+ 
+ $| = 1;
+ 
+@@ -41,20 +42,20 @@ $cut_on_apos=0;
+ $sent_bound="\n";
+ $print_par_bound = 0;
+ $weak_sbound = 1;
+-$affixes = 0; # car normalement géré par text2dag
++$affixes = 0; # car normalement gÃ©rÃ© par text2dag
+ #$split_before_ne=0;
+ my $best_recall=0;
+ 
+ if ($lang eq "fr" || $lang eq "en") {
+-  $min=qr/(?:[a-zàâäéêèëîïöôùûüÿç])/;
+-  $maj=qr/(?:[A-ZÀÉÈÊËÂÄÔÖÛÜÇ])/;
+-  $l=qr/(?:[àâäéêèëîïöôùûüÿça-zA-ZÀÉÈÊËÂÄÔÖÛÜÇ])/;
+-  $nonl=qr/(?:[^a-zàâäéêèëîïöôùûüÿçA-ZÀÉÈÊËÂÄÔÖÛÜÇ])/;
++  $min=qr/(?:[a-zÃ Ã¢Ã¤Ã©ÃªÃ¨Ã«Ã®Ã¯Ã¶Ã´Ã¹Ã»Ã¼Ã¿Ã§])/;
++  $maj=qr/(?:[A-ZÃ€Ã‰ÃˆÃŠÃ‹Ã‚Ã„Ã”Ã–Ã›ÃœÃ‡])/;
++  $l=qr/(?:[Ã Ã¢Ã¤Ã©ÃªÃ¨Ã«Ã®Ã¯Ã¶Ã´Ã¹Ã»Ã¼Ã¿Ã§a-zA-ZÃ€Ã‰ÃˆÃŠÃ‹Ã‚Ã„Ã”Ã–Ã›ÃœÃ‡])/;
++  $nonl=qr/(?:[^a-zÃ Ã¢Ã¤Ã©ÃªÃ¨Ã«Ã®Ã¯Ã¶Ã´Ã¹Ã»Ã¼Ã¿Ã§A-ZÃ€Ã‰ÃˆÃŠÃ‹Ã‚Ã„Ã”Ã–Ã›ÃœÃ‡])/;
+ } else {
+-  $min=qr/(?:[a-záä±æèïéêìëíåµ³ñòóôöàø¶¹\»úùüı¼¿])/;
+-  $maj=qr/(?:[A-ZÁÄ¡ÆÈÏÉÊÌËÍÅ£¥ÑÒÓÔÖÀØ¦©\«ÚÙÜİ¬¯])/;
+-  $l=qr/(?:[a-záä±æèïéêìëíåµ³ñòóôöàø¶¹\»úùüı¼¿A-ZÁÄ¡ÆÈÏÉÊÌËÍÅ£¥ÑÒÓÔÖÀØ¦©\«ÚÙÜİ¬¯])/;
+-  $nonl=qr/(?:[^a-záä±æèïéêìëíåµ³ñòóôöàø¶¹\»úùüı¼¿A-ZÁÄ¡ÆÈÏÉÊÌËÍÅ£¥ÑÒÓÔÖÀØ¦©\«ÚÙÜİ¬¯])/;
++  $min=qr/(?:[a-zÃ¡Ã¤Â±Ã¦Ã¨Ã¯Ã©ÃªÃ¬Ã«Ã­Ã¥ÂµÂ³Ã±Ã²Ã³Ã´Ã¶Ã Ã¸Â¶Â¹\Â»ÃºÃ¹Ã¼Ã½Â¼Â¿])/;
++  $maj=qr/(?:[A-ZÃÃ„Â¡Ã†ÃˆÃÃ‰ÃŠÃŒÃ‹ÃÃ…Â£Â¥Ã‘Ã’Ã“Ã”Ã–Ã€Ã˜Â¦Â©\Â«ÃšÃ™ÃœÃÂ¬Â¯])/;
++  $l=qr/(?:[a-zÃ¡Ã¤Â±Ã¦Ã¨Ã¯Ã©ÃªÃ¬Ã«Ã­Ã¥ÂµÂ³Ã±Ã²Ã³Ã´Ã¶Ã Ã¸Â¶Â¹\Â»ÃºÃ¹Ã¼Ã½Â¼Â¿A-ZÃÃ„Â¡Ã†ÃˆÃÃ‰ÃŠÃŒÃ‹ÃÃ…Â£Â¥Ã‘Ã’Ã“Ã”Ã–Ã€Ã˜Â¦Â©\Â«ÃšÃ™ÃœÃÂ¬Â¯])/;
++  $nonl=qr/(?:[^a-zÃ¡Ã¤Â±Ã¦Ã¨Ã¯Ã©ÃªÃ¬Ã«Ã­Ã¥ÂµÂ³Ã±Ã²Ã³Ã´Ã¶Ã Ã¸Â¶Â¹\Â»ÃºÃ¹Ã¼Ã½Â¼Â¿A-ZÃÃ„Â¡Ã†ÃˆÃÃ‰ÃŠÃŒÃ‹ÃÃ…Â£Â¥Ã‘Ã’Ã“Ã”Ã–Ã€Ã˜Â¦Â©\Â«ÃšÃ™ÃœÃÂ¬Â¯])/;
+ }
+ $initialclass=$maj;
+ 
+@@ -107,7 +108,7 @@ if ($abrfilename=~/\w/) {
+ 	if ((/^\"..+\"$/ || /^[^\"].+$/) && /^[^\#]/) {
+ 	    chomp;
+ 	    s/_/ /g;
+-	    s/^(.*[^\.].*\.)\.$/$1\_FINABR/; # peuvent être des abréviations finissant par point et finissant une phrase (type etc.)
++	    s/^(.*[^\.].*\.)\.$/$1\_FINABR/; # peuvent Ãªtre des abrÃ©viations finissant par point et finissant une phrase (type etc.)
+ 	    s/^\"//;
+ 	    s/\"$//;
+ 	    $rhs = $_;
+@@ -116,13 +117,13 @@ if ($abrfilename=~/\w/) {
+ 	    $rhs_nospace=~s/_FINABR//;
+ 	    $rhs_nospace=~s/ //g;
+ 	    $rhs_nospace2rhs{$rhs_nospace}=$rhs;
+-	    s/([\.\[\]\(\)\*\+])/\\$1/g; # échappement des caractères spéciaux
++	    s/([\.\[\]\(\)\*\+])/\\$1/g; # Ã©chappement des caractÃ¨res spÃ©ciaux
+ 	    s/^\\\. */\\\. \*/g;
+ 	    s/(?<=.)\\\. */ \*\\\. \*/g;
+ #	    s/ /\\s/g;
+ 
+ # 	    s/ \*$/)( \+\[\^ \]/ ||
+-# 	      s/ \*_FINABR$/)( \+\[\^ \]\|\$/; # on ne reconnaît les abr à la fin de la phrase que si elles ont le droit d'y être
++# 	      s/ \*_FINABR$/)( \+\[\^ \]\|\$/; # on ne reconnaÃ®t les abr Ã  la fin de la phrase que si elles ont le droit d'y Ãªtre
+ # 	    s/\_$//;
+ # 	    s/^/(/;
+ # 	    s/$/)/;    
+@@ -164,71 +165,71 @@ while (<STDIN>) {
+     }
+ 
+     s/^/ /; s/$/ /;
+-    if (!$no_sw && $lang !~ /^(ja|zh|tw|th)$/) {                               # si on peut tokeniser soi-même...
++    if (!$no_sw && $lang !~ /^(ja|zh|tw|th)$/) {                               # si on peut tokeniser soi-mÃªme...
+ 	s/(?<=[^\.\t])\.+(\s\s+)/ \.$1/g;                    # si suivi de deux blancs (ou TABs) ou plus, point+ est un token
+ 	s/(?<=\t)\.+(\s\s+)/\.$1/g;                          # idem
+-	s/ +/ /g;                                            # ceci étant exploité, on normalise les espaces
++	s/ +/ /g;                                            # ceci Ã©tant exploitÃ©, on normalise les espaces
+ 	s/\t+/\t/g;
+ 	s/ +\t/\t/g; s/\t +/\t/g;
+ 
+-	s/(_(?:UNSPLIT|REGLUE|SPECWORD)_[^\s{]+)/\1_PROTECT_/g; # on protège de la segmentation des tokens déjà découpés et identifiés par _UNSPLIT_ ou _REGLUE_
++	s/(_(?:UNSPLIT|REGLUE|SPECWORD)_[^\s{]+)/\1_PROTECT_/g; # on protÃ¨ge de la segmentation des tokens dÃ©jÃ  dÃ©coupÃ©s et identifiÃ©s par _UNSPLIT_ ou _REGLUE_
+ 	if ($lang =~ /^(fr|es|it)$/) {
+-	  s/[ \(\[]'([^ '][^']*?[^ '])'(?=[ ,;?\!:\"\)\(\*\#<>\[\]\%\/\=\+\«\»\½\&\`\.])/ ' \1 ' /g;          # les apostrophes peuvent servir à quoter...
++	  s/[ \(\[]'([^ '][^']*?[^ '])'(?=[ ,;?\!:\"\)\(\*\#<>\[\]\%\/\=\+\Â«\Â»\Â½\&\`\.])/ ' \1 ' /g;          # les apostrophes peuvent servir Ã  quoter...
+ 	  s/  / /g;
+-	  s/(?<=[^\'\s_])\'\s*/\'/g;                            # par défaut, on supprime les blancs suivant les guillemets sauf après " '" et "''"
+-	  s/(\s)\'(?=[^ _])/$1\' /g;                            # en français, les autres guillemets sont détachés
++	  s/(?<=[^\'\s_])\'\s*/\'/g;                            # par dÃ©faut, on supprime les blancs suivant les guillemets sauf aprÃ¨s " '" et "''"
++	  s/(\s)\'(?=[^ _])/$1\' /g;                            # en franÃ§ais, les autres guillemets sont dÃ©tachÃ©s
+ 	} else {
+-	  s/[ \(\[]'([^ '][^']*?[^ '])'(?=[ ,;?\!:\"\)\(\*\#<>\[\]\%\/\=\+\«\»\½\&\`\.])/ ' \1 ' /g;          # les apostrophes peuvent servir à quoter...
++	  s/[ \(\[]'([^ '][^']*?[^ '])'(?=[ ,;?\!:\"\)\(\*\#<>\[\]\%\/\=\+\Â«\Â»\Â½\&\`\.])/ ' \1 ' /g;          # les apostrophes peuvent servir Ã  quoter...
+ 	  s/  / /g;
+ 	}
+ 
+-	while (s/({[^}]*) ([^}]*}\s*_(?:EMAIL|EPSILON|URL|META_TEXTUAL_PONCT|SENT_BOUND|ETR))/$1\_SPACE$2/g) {} # on protège les espaces déjà présents dans ces entités nommées (cf ci dessous)
++	while (s/({[^}]*) ([^}]*}\s*_(?:EMAIL|EPSILON|URL|META_TEXTUAL_PONCT|SENT_BOUND|ETR))/$1\_SPACE$2/g) {} # on protÃ¨ge les espaces dÃ©jÃ  prÃ©sents dans ces entitÃ©s nommÃ©es (cf ci dessous)
+ 	if ($lang !~ /^(?:fr|en|es|it|nl|de|pt)$/) {
+-	  s/ *([,;?\!:\"\)\(\*\#<>\[\]\%\/\=\+\«\»\½\&\`]) */ $1 /g;# on isole toutes les ponctuations (et assimilées) sauf le point (½ est un guillement en l2)
++	  s/ *([,;?\!:\"\)\(\*\#<>\[\]\%\/\=\+\Â«\Â»\Â½\&\`]) */ $1 /g;# on isole toutes les ponctuations (et assimilÃ©es) sauf le point (Â½ est un guillement en l2)
+ 	} else {
+-	  s/ *([,;?\!:\"\)\(\*\#<>\[\]\%\/\=\+\«\»\&\`]) */ $1 /g;# on isole toutes les ponctuations (et assimilées) sauf le point
++	  s/ *([,;?\!:\"\)\(\*\#<>\[\]\%\/\=\+\Â«\Â»\&\`]) */ $1 /g;# on isole toutes les ponctuations (et assimilÃ©es) sauf le point
+ 	}
+ 	s/  +/ /g;
+-	while (s/({[^}]*) ([^}]*}\s*_(?:EMAIL|EPSILON|URL|META_TEXTUAL_PONCT|SENT_BOUND|ETR))/$1$2/g) {} # les espaces qu'on vient d'insérer sont mauvais dans 
+-	                                                                      # ces entités nommées: on les enlève...
+-	s/_SPACE/ /g;                                                         # ...et on restaure ceux qui y étaient avant
++	while (s/({[^}]*) ([^}]*}\s*_(?:EMAIL|EPSILON|URL|META_TEXTUAL_PONCT|SENT_BOUND|ETR))/$1$2/g) {} # les espaces qu'on vient d'insÃ©rer sont mauvais dans 
++	                                                                      # ces entitÃ©s nommÃ©es: on les enlÃ¨ve...
++	s/_SPACE/ /g;                                                         # ...et on restaure ceux qui y Ã©taient avant
+ 	while (s/(_(?:REGLUE|UNSPLIT|SPECWORD)_[^\s{]+)(?<!_PROTECT_)\s+/\1/g) {}
+ 	s/_PROTECT_//g;
+ 
+-	s/ *(_UNDERSCORE|_ACC_O|_ACC_F) */ $1 /g;            # on isole aussi les ponctuations échappées
++	s/ *(_UNDERSCORE|_ACC_O|_ACC_F) */ $1 /g;            # on isole aussi les ponctuations Ã©chappÃ©es
+ 
+ 	if ($lang eq "fr") {
+ 	  s/($nonl)et\s*\/\s*ou($nonl)/$1 et\/ou $2/g;         # cas particulier: cas particulier pour et/ou
+ 	} elsif ($lang eq "en") {
+ 	  s/($nonl)and\s*\/\s*or($nonl)/$1 and\/or $2/g;         # cas particulier: cas particulier pour and/or
+ 	}
+-	s/\&\s*(amp|quot|lt|gt)\s*;/\&$1;/g;                       # cas particulier: entités XML
+-	s/ &lt; -/&lt;-/g;                                     # cas particulier: flèches
+-	s/- &gt; /-&gt; /g;                                     # cas particulier: flèches
++	s/\&\s*(amp|quot|lt|gt)\s*;/\&$1;/g;                       # cas particulier: entitÃ©s XML
++	s/ &lt; -/&lt;-/g;                                     # cas particulier: flÃ¨ches
++	s/- &gt; /-&gt; /g;                                     # cas particulier: flÃ¨ches
+ 
+ 	s/ +\t/\t/g; s/\t +/\t/g;
+-	s/(\.\.*) *( |$)/$1$2/g;                             # un seul blanc derrière 2 points ou plus
++	s/(\.\.*) *( |$)/$1$2/g;                             # un seul blanc derriÃ¨re 2 points ou plus
+ 
+ 	# les entnom sont des tokens
+ 	s/(\} *_[A-Za-z_]+)/$1 /g;
+ 
+-	# POINT après une minuscule
+-	while (s/($min)(\.\.*\s*)([\(\[\"\)\]\?\!\'\/\_\½][^{}]*|(?:$l)[^{}]*)?(\{|$)/$1 $2 $3$4/g) {} # avant certaines poncts ou une lettre ou retour-chariot ou {, point+ est un token, mais pas dans les commentaires...
++	# POINT aprÃ¨s une minuscule
++	while (s/($min)(\.\.*\s*)([\(\[\"\)\]\?\!\'\/\_\Â½][^{}]*|(?:$l)[^{}]*)?(\{|$)/$1 $2 $3$4/g) {} # avant certaines poncts ou une lettre ou retour-chariot ou {, point+ est un token, mais pas dans les commentaires...
+ 	s/($min)(\.\.+\s*)([^ ])/$1 $2 $3/g;                 # avant qqch d'autre (y compris un chiffre), il faut 2 points pour cela
+ 	s/ +\t/\t/g; s/\t +/\t/g;
+ 
+-	# POINT après une majuscule
++	# POINT aprÃ¨s une majuscule
+ 	s/\b($maj\.)($maj$min)/$1 $2/g;                      # insertion d'un blanc entre maj-point et maj-min
+ 	s/($maj{3,})\./$1 \./g;                              # 3 majuscules de suite puis point -> le point est une ponct
+ 	s/\.($maj{3,})/\. $1/g;                              # point puis 3 majuscules de suite -> le point est une ponct
+ 
+-	# POINT après un chiffre
++	# POINT aprÃ¨s un chiffre
+ 	s/(\d)(\.+)([^0-9])/$1 $2 $3/g;                      # chiffre point non-chiffre -> le point est une ponct
+ 	
+         # TIRETS et slashes
+ 	s/(\d)(\s*\-\s*)(\d)/$1 $2 $3/g;                     # le tiret entre 2 chiffres est une ponct
+-	s/([\(\[\"\)\]\,\;\%\½])\-/$1 -/g;                   # le tiret après une ponct autre que point en est séparé
+-	s/\-([\(\[\"\)\]\,\;\%\½])/- $1/g;                   # le tiret avant une ponct autre que point en est séparé
++	s/([\(\[\"\)\]\,\;\%\Â½])\-/$1 -/g;                   # le tiret aprÃ¨s une ponct autre que point en est sÃ©parÃ©
++	s/\-([\(\[\"\)\]\,\;\%\Â½])/- $1/g;                   # le tiret avant une ponct autre que point en est sÃ©parÃ©
+ 	s/($l)([\/\-])\s*($l)/$1$2$3/g;                      # recollages de tirets ou de slashes
+ 	s/($l)\s*([\/\-])($l)/$1$2$3/g;
+ 	s/ +\t/\t/g; s/\t +/\t/g;
+@@ -243,7 +244,7 @@ while (<STDIN>) {
+ #	s/([^\{])\{/$1 \{/g;
+ 
+ 	if ($lang =~ /^(fr|es|it)$/) {
+-	  s/(\s)\'(?=[^ _])/$1\' /g;                            # rebelotte, car des nouveaux blancs ont pu être insérés
++	  s/(\s)\'(?=[^ _])/$1\' /g;                            # rebelotte, car des nouveaux blancs ont pu Ãªtre insÃ©rÃ©s
+ 	}
+ 	if ($cut_on_apos && $cut_on_apos_re ne "") {
+ 	  s/ (${cut_on_apos_re})'([^ ])/ \1' \2/g;
+@@ -253,8 +254,8 @@ while (<STDIN>) {
+ 	s/(\s\.)\-/$1 -/g;
+ 	s/\.(\-\s)/. $1/g;
+     } else {
+-	s/(?<=[^\s])([\"\*\%\«\»\½]\s)/ _REGLUE_$1/g; # prudence
+-	s/(\s[\"\*\%\«\»\½])([^\s]+)/$1 _REGLUE_$2/g; # prudence
++	s/(?<=[^\s])([\"\*\%\Â«\Â»\Â½]\s)/ _REGLUE_$1/g; # prudence
++	s/(\s[\"\*\%\Â«\Â»\Â½])([^\s]+)/$1 _REGLUE_$2/g; # prudence
+ 	s/(?<=_REGLUE_)\s+_REGLUE_//g;
+ 	s/(?<=_UNSPLIT_)\s+_REGLUE_//g;
+     }
+@@ -268,10 +269,10 @@ while (<STDIN>) {
+       s/(?<=[^\}]) (S ?\. A ?\. R ?\. L ?\.) / {$1} S.A.R.L. /go;
+       s/(?<=[^\}]) (S ?\. A ?\.) / {$1} S.A. /go;
+       s/(?<=[^\}]) M +\. / {M .} M. /go;
+-      s/(?<=[^\}]) ([tT][eéEÉ][Ll]) +\. / {\1 .} \1. /go;
++      s/(?<=[^\}]) ([tT][eÃ©EÃ‰][Ll]) +\. / {\1 .} \1. /go;
+       s/(?<=[^\}]) \+ \+ / {+ +} ++ /go;
+       s/(?<=[^\}]) \+ \/ \- / {+ \/ -} +\/- /go;
+-      #    s/([àâäéêèëîïöôùûüÿça-zA-ZÀÉÈÊËÂÄÔÖÛÜÇ]) (\*|_UNDERSCORE|_) ([^ \{\}]+)/$1 {$2 $3} $3/go;
++      #    s/([Ã Ã¢Ã¤Ã©ÃªÃ¨Ã«Ã®Ã¯Ã¶Ã´Ã¹Ã»Ã¼Ã¿Ã§a-zA-ZÃ€Ã‰ÃˆÃŠÃ‹Ã‚Ã„Ã”Ã–Ã›ÃœÃ‡]) (\*|_UNDERSCORE|_) ([^ \{\}]+)/$1 {$2 $3} $3/go;
+       
+     }
+ 
+@@ -308,13 +309,13 @@ while (<STDIN>) {
+     }
+ 
+     if ($affixes) {
+-      # ATTENTION:  normalement, ce travail est fait plus tard, par text2dag. Ceci ne devrait être utilisé que si l'on utilise sxpipe comme tokenizer pur (i.e., sans faire de vraie différence entre token et forme)
++      # ATTENTION:  normalement, ce travail est fait plus tard, par text2dag. Ceci ne devrait Ãªtre utilisÃ© que si l'on utilise sxpipe comme tokenizer pur (i.e., sans faire de vraie diffÃ©rence entre token et forme)
+       if ($lang eq "fr") {
+ 	# hyphenated suffixes
+ 	# doit-elle => doit -elle
+ 	# ira-t-elle => ira -t-elle
+ 	# ira - t -elle => ira => -t-elle
+-	s/(- ?t ?)?-(ce|elles?|ils?|en|on|je|la|les?|leur|lui|[mt]oi|[vn]ous|tu|y)(?![\wéèêîôûëïüäù])/ $1-$2/go ;
++	s/(- ?t ?)?-(ce|elles?|ils?|en|on|je|la|les?|leur|lui|[mt]oi|[vn]ous|tu|y)(?![\wÃ©Ã¨ÃªÃ®Ã´Ã»Ã«Ã¯Ã¼Ã¤Ã¹])/ $1-$2/go ;
+ 	# donne-m'en => donne -m'en
+ 	s/(- ?t ?)?-([mlt]\')/ $1-$2/go ;
+ 	
+@@ -341,7 +342,7 @@ while (<STDIN>) {
+     s/(?<=[^\}]) (turn over) / {$1} turn-over /g;
+     s/(?<=[^\}]) (check liste?) / {$1} check-list /g;
+     if ($lang eq "fr") {
+-      #abréviations courantes
++      #abrÃ©viations courantes
+       s/(?<=[^\}])([- ])([Qq])qfois /$1\{$2qfois} $2elquefois /go;
+       s/(?<=[^\}])([- ])([Ee])xple /$1\{$2xple} $2xemple /go;
+       s/(?<=[^\}])([- ])([Bb])cp /$1\{$2cp} $2eaucoup /go;
+@@ -353,25 +354,25 @@ while (<STDIN>) {
+       s/(?<=[^\}])([- ])([Tt])(jr?s) /$1\{$2$3} $2oujours /go;
+       s/(?<=[^\}])([- ])([Qq])que(s?) /$1\{$2ue$3} $2uelque$3 /go;
+       s/(?<=[^\}])([- ])([Qq])n /$1\{$2n} $2uelqu'un /go;
+-      s/(?<=[^\}])([- ])([Cc])(\.?-?[aà]\.?-?d\.?) /$1\{$2$3} $2'est-à-dire /go;
++      s/(?<=[^\}])([- ])([Cc])(\.?-?[aÃ ]\.?-?d\.?) /$1\{$2$3} $2'est-Ã -dire /go;
+       s/(?<=[^\}])([- ])([Nn])breu(x|ses?) /$1\{$2breu$3} $2ombreu$3 /go;
+-      s/(?<=[^\}])([- ])([^ ]+t)([º°]) /$1\{$2$3} $2ion(s) /go;
++      s/(?<=[^\}])([- ])([^ ]+t)([ÂºÂ°]) /$1\{$2$3} $2ion(s) /go;
+       s/(?<=[^\}])([- ])([Ss])(n?t) /$1\{$2$3} $2ont /go;
+       s/(?<=[^\}])([- ])(le|du|les|ce) ([wW][Ee]) /$1$2 \{$3} week-end /go;
+       
+       # fautes courantes
+       s/(?<=[^\}]) (avant gardiste) / {$1} avant-gardiste /g;
+-      s/(?<=[^\}])([- ])à (fortiori|priori|posteriori|contrario) /$1\{à} a $2 /go;
++      s/(?<=[^\}])([- ])Ã  (fortiori|priori|posteriori|contrario) /$1\{Ã } a $2 /go;
+       s/(?<=[^\}])([- ])pa /$1\{pa} pas /go;
+       s/(?<=[^\}])([- ])er /$1\{er} et /go;
+-      s/(?<=[^\}])([- ])([Qq])uant ([^aà])/$1\{$2uant} $2and $3/go;
+-      s/(?<=[^\}])([- ])QUANT ([^AÀ])/$1\{QUANT} QUAND $2/go;
+-      s/(?<=[^\}])([- ])([Cc]) (est|était) /$1\{$2} $2' $3 /go;
+-      s/(?<=[^\}])([- ])(Etats[- ][Uu]nis) /$1\{$2} États-Unis /go;
+-      s/(?<=[^\}])([- ])([Rr])([eé]num[eé]ration) /$1\{$2$3} $2émunération /go;
++      s/(?<=[^\}])([- ])([Qq])uant ([^aÃ ])/$1\{$2uant} $2and $3/go;
++      s/(?<=[^\}])([- ])QUANT ([^AÃ€])/$1\{QUANT} QUAND $2/go;
++      s/(?<=[^\}])([- ])([Cc]) (est|Ã©tait) /$1\{$2} $2' $3 /go;
++      s/(?<=[^\}])([- ])(Etats[- ][Uu]nis) /$1\{$2} Ã‰tats-Unis /go;
++      s/(?<=[^\}])([- ])([Rr])([eÃ©]num[eÃ©]ration) /$1\{$2$3} $2Ã©munÃ©ration /go;
+       s/(?<=[^\}])([- ])c (est|ets) /$1\{c} c' \{$2} est /go;
+     } elsif ($lang eq "en") {
+-      #abréviations courantes
++      #abrÃ©viations courantes
+       s/(?<=[^\}])([- ])(acct(?: ?\.)?) /$1\{$2} account /g;
+       s/(?<=[^\}])([- ])(addl(?: ?\.)?) /$1\{$2} additional /g;
+       s/(?<=[^\}])([- ])(amt(?: ?\.)?) /$1\{$2} amount /g;
+@@ -455,30 +456,30 @@ while (<STDIN>) {
+       s/ ___not / not /go;
+     }
+ 
+-    # re-collage des points appartenant à des abréviations
++    # re-collage des points appartenant Ã  des abrÃ©viations
+     if ($no_af != 1) {
+       if ($lang eq "fr") {
+-	s/(?<=[^a-zàâäéêèëîïöôùûüÿçA-ZÀÉÈÊËÂÄÔÖÛÜÇ\_\-])$abrp_re(\s+[^\s])/{$1} get_normalized_pctabr($1).$2/ge;
+-	s/(?<=[^a-zàâäéêèëîïöôùûüÿçA-ZÀÉÈÊËÂÄÔÖÛÜÇ\_\-])$abrp_fin_re(\s|$)/{$1} get_normalized_pctabr($1).$2/ge;
++	s/(?<=[^a-zÃ Ã¢Ã¤Ã©ÃªÃ¨Ã«Ã®Ã¯Ã¶Ã´Ã¹Ã»Ã¼Ã¿Ã§A-ZÃ€Ã‰ÃˆÃŠÃ‹Ã‚Ã„Ã”Ã–Ã›ÃœÃ‡\_\-])$abrp_re(\s+[^\s])/{$1} get_normalized_pctabr($1).$2/ge;
++	s/(?<=[^a-zÃ Ã¢Ã¤Ã©ÃªÃ¨Ã«Ã®Ã¯Ã¶Ã´Ã¹Ã»Ã¼Ã¿Ã§A-ZÃ€Ã‰ÃˆÃŠÃ‹Ã‚Ã„Ã”Ã–Ã›ÃœÃ‡\_\-])$abrp_fin_re(\s|$)/{$1} get_normalized_pctabr($1).$2/ge;
+       } elsif ($lang !~ /^(ja|zh|tw|th)$/) {
+-	s/(?<=[^a-záä±æèïéêìëíåµ³ñòóôöàø¶¹\»úùüı¼¿A-ZÁÄ¡ÆÈÏÉÊÌËÍÅ£¥ÑÒÓÔÖÀØ¦©\«ÚÙÜİ¬¯\_\-\s])$abrp_re(\s+[^\s])/{$1} get_normalized_pctabr($1).$2/ge;
+-	s/(?<=[^a-záä±æèïéêìëíåµ³ñòóôöàø¶¹\»úùüı¼¿A-ZÁÄ¡ÆÈÏÉÊÌËÍÅ£¥ÑÒÓÔÖÀØ¦©\«ÚÙÜİ¬¯\_\-\s])$abrp_fin_re(\s|$)/{$1} get_normalized_pctabr($1).$2/ge;
++	s/(?<=[^a-zÃ¡Ã¤Â±Ã¦Ã¨Ã¯Ã©ÃªÃ¬Ã«Ã­Ã¥ÂµÂ³Ã±Ã²Ã³Ã´Ã¶Ã Ã¸Â¶Â¹\Â»ÃºÃ¹Ã¼Ã½Â¼Â¿A-ZÃÃ„Â¡Ã†ÃˆÃÃ‰ÃŠÃŒÃ‹ÃÃ…Â£Â¥Ã‘Ã’Ã“Ã”Ã–Ã€Ã˜Â¦Â©\Â«ÃšÃ™ÃœÃÂ¬Â¯\_\-\s])$abrp_re(\s+[^\s])/{$1} get_normalized_pctabr($1).$2/ge;
++	s/(?<=[^a-zÃ¡Ã¤Â±Ã¦Ã¨Ã¯Ã©ÃªÃ¬Ã«Ã­Ã¥ÂµÂ³Ã±Ã²Ã³Ã´Ã¶Ã Ã¸Â¶Â¹\Â»ÃºÃ¹Ã¼Ã½Â¼Â¿A-ZÃÃ„Â¡Ã†ÃˆÃÃ‰ÃŠÃŒÃ‹ÃÃ…Â£Â¥Ã‘Ã’Ã“Ã”Ã–Ã€Ã˜Â¦Â©\Â«ÃšÃ™ÃœÃÂ¬Â¯\_\-\s])$abrp_fin_re(\s|$)/{$1} get_normalized_pctabr($1).$2/ge;
+       }
+     }
+ 
+     if ($lang !~ /^(ja|zh|tw|th)$/) {
+-      # abréviations en point qui sont en fin de phrase
+-      # _UNSPLIT_ a pour effet que les tokens (dans les commentaires) associés
+-      # à la ponctuation finale seront les mêmes que ceux associés à la forme précédente,
+-      # i.e. à l'abréviation:
++      # abrÃ©viations en point qui sont en fin de phrase
++      # _UNSPLIT_ a pour effet que les tokens (dans les commentaires) associÃ©s
++      # Ã  la ponctuation finale seront les mÃªmes que ceux associÃ©s Ã  la forme prÃ©cÃ©dente,
++      # i.e. Ã  l'abrÃ©viation:
+       # echo "adj." | sxpipe    donne:
+       # {<F id="E1F1">adj</F> <F id="E1F2">.</F>} adj. {<F id="E1F1">adj</F> <F id="E1F2">.</F>} .
+       # c'est tok2cc/rebuild_easy_tags.pl qui fait ce travail
+-      # on ne le fait que si l'abréviation concernée a le droit de terminer une phrase,
+-      # ce qui est indiqué dans le lexique par le fait qu'elle se termine par 2 points (!)
++      # on ne le fait que si l'abrÃ©viation concernÃ©e a le droit de terminer une phrase,
++      # ce qui est indiquÃ© dans le lexique par le fait qu'elle se termine par 2 points (!)
+       s/(?<=[^\.\s\_])(\.\_FINABR\.*) *$/\. _UNSPLIT_$1/;
+ 
+-      # Il faut maintenant gérer les abrév reconnues dans une entnom (type "{{godz .} godz. 16} _TIME")
++      # Il faut maintenant gÃ©rer les abrÃ©v reconnues dans une entnom (type "{{godz .} godz. 16} _TIME")
+       if ($no_sw) {
+ 	while (s/(\{[^\{\}]*)\{([^\{\}]*)\} [^ ]+/$1$2/g) {
+ 	}
+@@ -490,30 +491,30 @@ while (<STDIN>) {
+       s/^ //;
+     }
+ 
+-    # Détachements particuliers
++    # DÃ©tachements particuliers
+     if ($lang eq "pl") {
+       if ($no_sw) {
+-	s/(^|\s)(przeze|na|za|do|ode|dla|we)(ñ)(\s|$)/$1\{$2$3\} $2 \{$2$3\} _$3$4/g;
++	s/(^|\s)(przeze|na|za|do|ode|dla|we)(Ã±)(\s|$)/$1\{$2$3\} $2 \{$2$3\} _$3$4/g;
+       } else {
+-	s/(^|\s)(przeze|na|za|do|ode|dla|we)(ñ)(\s|$)/$1$2 \{$3\} _$3$4/g;
++	s/(^|\s)(przeze|na|za|do|ode|dla|we)(Ã±)(\s|$)/$1$2 \{$3\} _$3$4/g;
+       }
+     }
+ 
+     # SEGMENTATION en phrases si pas d'option -no_s
+     # ---------------------------------------------
+-    # on identifie de toute façon les frontières de phrases
++    # on identifie de toute faÃ§on les frontiÃ¨res de phrases
+     # - si -no_s, on les indique par un espace
+     # - sinon, on en a de 2 types: 
+-    #     * celles repérées par #__# sont remplacées par un retour-chariot,
+-    #     * celles reprérées par #_# sont remplacées par $sent_bound, 
+-    #       qui vaut retour-chariot par défaut mais qui peut être redéfini 
++    #     * celles repÃ©rÃ©es par #__# sont remplacÃ©es par un retour-chariot,
++    #     * celles reprÃ©rÃ©es par #_# sont remplacÃ©es par $sent_bound, 
++    #       qui vaut retour-chariot par dÃ©faut mais qui peut Ãªtre redÃ©fini 
+     #       par -sb=XXX (souvent, XXX = _SENT_BOUND)
+     s/ +\t/\t/g; s/\t +/\t/g;
+     s/  +/ /g;
+     s/\t\t+/\t/g;
+ 
+     if ($lang !~ /^(ja|zh|tw|th)$/) {    
+-      s/([\.:;\?\!])\s*([\"\½]\s*(?:$maj|[\[_\{])[^\"\½]*[\.:;\?\!]\s*[\"\½])\s*(\s$maj|[\[\{])/$1\#\_\#$2\#\_\#$3/g; # détection de phrases entières entre dbl-quotes
++      s/([\.:;\?\!])\s*([\"\Â½]\s*(?:$maj|[\[_\{])[^\"\Â½]*[\.:;\?\!]\s*[\"\Â½])\s*(\s$maj|[\[\{])/$1\#\_\#$2\#\_\#$3/g; # dÃ©tection de phrases entiÃ¨res entre dbl-quotes
+       s/(?<=\s)(\.\s*_UNDERSCORE)/{$1} ./go; # ad hoc pour mondediplo et ses underscores de fin d'article (?)
+       #    $special_split = ($split_before_ne) ? qr/[\{\[_]/ : qr/[\[_]/;
+       $special_split = qr/[\{\[_]/;
+@@ -529,12 +530,12 @@ while (<STDIN>) {
+ 	s/($l|[\!\?])(\s*\.\.\.*)(\s+(?:$l|$special_split))/$1$2\#\_\#$3/g;
+ 	s/\_FINABR(\s*$initialclass|$special_split)/ _UNSPLIT_.\#\_\#$1/g;
+       }
+-      s/(\.\s*\.+)(\s+$initialclass|[\[_\{\-\«])/$1\#\_\#$2/g;	 # attention !!!
+-      s/([\?\!]\s*\.*)(\s+$initialclass|[\[_\{\-\«])/$1\#\_\#$2/g; # attention !!!
++      s/(\.\s*\.+)(\s+$initialclass|[\[_\{\-\Â«])/$1\#\_\#$2/g;	 # attention !!!
++      s/([\?\!]\s*\.*)(\s+$initialclass|[\[_\{\-\Â«])/$1\#\_\#$2/g; # attention !!!
+       s/([\.\?\!]\s*\.\.+)(\s+)/$1\#\_\#$2/g;			   # attention
+-      s/([\.\?\!,:])(\s+[\-\+\«])/$1\#\_\#$2/g;			   # attention
++      s/([\.\?\!,:])(\s+[\-\+\Â«])/$1\#\_\#$2/g;			   # attention
+       if ($weak_sbound) {
+-	s/(:\s*\.*)(\s+$initialclass|[\[_\{\-\«])/$1\#\_\#$2/g; # attention !!!
++	s/(:\s*\.*)(\s+$initialclass|[\[_\{\-\Â«])/$1\#\_\#$2/g; # attention !!!
+ 	s/(:\s*\.\.+)(\s+)/$1\#\_\#$2/g;			# attention
+       }
+     }
+@@ -545,20 +546,20 @@ while (<STDIN>) {
+       if ($best_recall) {
+ 	s/(,)(\s+[\-\+])/$1\#\_\#$2/g; # attention
+       }
+-      while (s/^((?:[^\"]*[\"\½][^\"]*[\"\½])*[^\"]*\.)(\s+[\"\½])/$1\#\_\#$2/g) {
++      while (s/^((?:[^\"]*[\"\Â½][^\"]*[\"\Â½])*[^\"]*\.)(\s+[\"\Â½])/$1\#\_\#$2/g) {
+       }											 # attention
+-      while (s/^([^\"]*[\"\½](?:[^\"]*[\"\½][^\"]*\")*[^\"]*\.\s+[\"\½])\s+/$1\#\_\#/g) {
++      while (s/^([^\"]*[\"\Â½](?:[^\"]*[\"\Â½][^\"]*\")*[^\"]*\.\s+[\"\Â½])\s+/$1\#\_\#/g) {
+       }				# attention
+ 
+       if ($weak_sbound) {
+-	s/(\s+);(\s+)/$1;\#\_\#$2/g; # les points-virgules sont des frontières de phrases ($sent_bound à la sortie, qui peut être retour chariot)
++	s/(\s+);(\s+)/$1;\#\_\#$2/g; # les points-virgules sont des frontiÃ¨res de phrases ($sent_bound Ã  la sortie, qui peut Ãªtre retour chariot)
+       }
+     }
+ 
+-    s/$/\#\__\#/; # tout retour chariot dans le source est une frontière de paragraphe (retour chariot à la sortie)
++    s/$/\#\__\#/; # tout retour chariot dans le source est une frontiÃ¨re de paragraphe (retour chariot Ã  la sortie)
+ 
+     if ($lang !~ /^(ja|zh|tw|th)$/) {    
+-      # si on a détecté une frontière de phrase, tout point+ qui la précède est à isoler
++      # si on a dÃ©tectÃ© une frontiÃ¨re de phrase, tout point+ qui la prÃ©cÃ¨de est Ã  isoler
+       if (!$no_sw) {
+ 	s/([^\.\{_])(\.+\s*)\#\_\#/$1 $2\#_\#/g;
+       } else {
+@@ -568,9 +569,9 @@ while (<STDIN>) {
+     }
+     if ($toksent) {			    # si on nous demande de segmenter en phrases
+       while (s/(\{[^\}]*)\#\_\#/$1 /g) {
+-      }		      # attention: ces lignes ne gèrent (pour l'instant) pas les profondeurs
++      }		      # attention: ces lignes ne gÃ¨rent (pour l'instant) pas les profondeurs
+       while (s/(\([^\)]*)\#\_\#/$1 /g) {
+-      }		       #   de parenthèses supérieures à 1. Si donc on a "( ( ) #_# )",
++      }		       #   de parenthÃ¨ses supÃ©rieures Ã  1. Si donc on a "( ( ) #_# )",
+       #	while (s/(\[[^\]]*)\#\_\#/$1 /g) {} #   il y aura une erreur.
+       s/\s*\#\_\#\s*/ $sent_bound /g;
+       s/\s*\#\__\#\s*/\n/g;
+@@ -583,7 +584,7 @@ while (<STDIN>) {
+     s/(^|\n) +/\1/g;
+     s/ +$//;
+ 
+-    if (/( - .*){8,}/) { # à partir de 8 (choisi au plus juste), on va considérer qu'on est face à une liste
++    if (/( - .*){8,}/) { # Ã  partir de 8 (choisi au plus juste), on va considÃ©rer qu'on est face Ã  une liste
+       s/ - /\n- /g;
+     }
+ 
