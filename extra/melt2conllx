@@ -1,0 +1,64 @@
+#!/usr/bin/env ruby
+#
+# Convert `MElt -tdL` output into *.conllx format.  Usage:
+#
+#     melt2conllx < input.melt > output.conllx
+#
+# Input should be one line per sentence, formatted like:
+#
+#     Durant/P/durant le/DET/le trajet/NC/trajet qui/PROREL/qui
+#
+# The first field is the surface form, the second is the POSTAG, and the
+# third is the lemma.
+
+# Generate course-grained part-of-speech tags from regular part-of-speech
+# tags, in hopes that it will help the parser.
+CPOSTAG = {
+  "CLS" => "CL",
+  "V" => "V",
+  "DET" => "D",
+  "NC" => "N",
+  "CC" => "C",
+  "ADJ" => "A",
+  "DET" => "D",
+  "NC" => "N",
+  "P" => "P",
+  "ADV" => "ADV",
+  "VINF" => "V",
+  "CLS" => "CL",
+  "CLO" => "CL",
+  "PONCT" => "PONCT",
+  "ADJWH" => "A",
+  "ADVWH" => "A",
+  "CLR" => "CL",
+  "CS" => "C",
+  "DETWH" => "D",
+  "ET" => "ET",
+  "I" => "I",
+  "NPP" => "N",
+  "P+D" => "P+D",
+  "P+PRO" => "P+PRO",
+  "PREF" => "PREF",
+  "PRO" => "PRO",
+  "PROREL" => "PRO",
+  "PROWH" => "PRO",
+  "VIMP" => "V",
+  "VPP" => "V",
+  "VPR" => "V",
+  "VS" => "V"
+}
+
+# One sentence per line.
+STDIN.each_line do |line|
+  # Convert each word into a CONLLX row.
+  line.chomp.split(/ /).each_with_index do |token, index|
+    form_and_postag, slash, lemma = token.rpartition('/')
+    form, slash, postag = form_and_postag.rpartition('/')
+    cpostag = CPOSTAG[postag] || postag
+    puts([index+1, form, lemma, cpostag, postag, "_", "_"].join("\t"))
+  end
+
+  # Separate sentences with a blank line, or else maltparser will get
+  # confused.
+  puts
+end

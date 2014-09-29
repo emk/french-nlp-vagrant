@@ -16,12 +16,15 @@ cp /vagrant/extra/env.sh /home/vagrant/local.sh
 # Set up some variables we only need during provisioning.
 export DEBIAN_FRONTEND=noninteractive
 
-# Make sure we have all the necessary locales.
+# Make sure we have all the necessary locales, to prevent Perl from being
+# confused.
 sudo dpkg-reconfigure locales
 
-# Install OS packages that we want.  ttyrec is for recording the screen and
-# git is for generating patches.
-sudo apt-get install -y ttyrec git python-numpy recode
+# Install OS packages that we want.  ttyrec is for recording the screen.
+# git is for generating patches.  Calibre is for 'ebook-convert'.  The
+# others are dependencies of various tools we install from source.
+sudo apt-get install -y ttyrec git python-numpy recode openjdk-7-jre-headless \
+    calibre
 
 # Install Perl packages that we want.  We use cpanminus instead of cpan,
 # because cpan wants to have a long conversation with us about defaults.
@@ -46,28 +49,30 @@ function standard_install() {
 }
 
 # Install MElt tokenizer.
-standard_install /usr/local/bin/MElt melt-0.6
+if [ ! -f packages/melt-2.0b4.tar.gz ]; then
+    # We don't even try to check this into git; it's about 350MB.
+    url=https://gforge.inria.fr/frs/download.php/file/33238/melt-2.0b4.tar.gz
+    (cd packages && curl -O "$url")
+fi
+standard_install /usr/local/bin/MElt melt-2.0b4
+# MElt's -L option insists on this being readable for some reason.  We
+# don't care; we're in a VM anyway.
+sudo chown -R vagrant:vagrant /usr/local/share/melt/fr/lemmatization_data.db
+# Install our custom tools for interfacing with MElt.
+sudo install extra/melt2conllx /usr/local/bin/
+sudo install extra/tag /usr/local/bin/
 
-# Install alexina (needed by LEFFF and sxpipe).
+# Install maltparser, which was never really meant to be installed.
+if [ ! -d /vagrant/maltparser-1.7.2 ]; then
+    cd /vagrant
+    tar xzf packages/maltparser-1.7.2.tar.gz
+    cp packages/fremalt-1.7.mco maltparser-1.7.2/
+fi
+sudo install extra/parse /usr/local/bin/
+
+# Install alexina (needed by LEFFF).
 standard_install /usr/local/share/alexina alexina-tools-1.6
 
-# Install the LEFFF lexicon (needed by sxpipe, but also pretty awesome just
-# by itself).
+# Install the LEFFF lexicon.
 standard_install /usr/local/share/lefff lefff-3.2
 
-# Enable this code if you want to try to make sxpipe work.  It can be made
-# build (perhaps with a few tweaks I didn't record here), but I don't think
-# it likes UTF-8 much, judging from its output.  And it's not clear that it
-# produces the input format we need, in any case.  To get things working,
-# start with our patches to melt-0.6.
-if false; then
-    # Install the support packages we want.
-    sudo apt-get install -y g++
-    sudo cpanm install AppConfig
-
-    # Install syntax parser utilities (needed by sxpipe).
-    standard_install /usr/local/share/syntax syntax-6.0b7
-
-    # Install sxpipe (smart tokenizer).
-    standard_install /usr/local/bin/sxpipe sxpipe-2.0b3 "LDFLAGS=-lm"
-fi

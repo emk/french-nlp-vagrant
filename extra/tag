@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Tokenize, lemmatize and fix all-uppercase sentences with MElt, then pass
+# to melt2conllx for conversion to *.conllx format.  There are other MElt
+# options you can try if your text is full of spelling errors, typos and
+# other dirt—or you can try to get sxpipe working on a modern system using
+# UTF-8 data, for really aggressive cleanup.
+MElt -tdL | melt2conllx

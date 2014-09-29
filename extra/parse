@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# This was never intended to play nicely on a Unix command-line, so let's
+# fool it a bit.
+#cd /usr/local/share/maltparser
+cd /vagrant/maltparser-1.7.2
+java -Xmx1024m -jar maltparser-1.7.2.jar -c fremalt-1.7 \
+    -i <(cat) -o >(cat) -m parse

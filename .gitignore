@@ -1,4 +1,8 @@
 /.vagrant
 /melt-*
+/maltparser-*
 /alexina-tools-*
 /lefff-*
+
+# This is too huge to check into git.
+/packages/melt-2.0b4.tar.gz
