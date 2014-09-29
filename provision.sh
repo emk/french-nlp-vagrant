@@ -21,10 +21,9 @@ export DEBIAN_FRONTEND=noninteractive
 sudo dpkg-reconfigure locales
 
 # Install OS packages that we want.  ttyrec is for recording the screen.
-# git is for generating patches.  Calibre is for 'ebook-convert'.  The
-# others are dependencies of various tools we install from source.
-sudo apt-get install -y ttyrec git python-numpy recode openjdk-7-jre-headless \
-    calibre
+# git is for generating patches.  The others are dependencies of various
+# tools we install from source.
+sudo apt-get install -y ttyrec git python-numpy recode openjdk-7-jre-headless
 
 # Install Perl packages that we want.  We use cpanminus instead of cpan,
 # because cpan wants to have a long conversation with us about defaults.
@@ -49,18 +48,26 @@ function standard_install() {
 }
 
 # Install MElt tokenizer.
-if [ ! -f packages/melt-2.0b4.tar.gz ]; then
+if [ ! -f /usr/local/bin/MElt ] && [ ! -f /vagrant/packages/melt-2.0b4.tar.gz ]
+then
     # We don't even try to check this into git; it's about 350MB.
     url=https://gforge.inria.fr/frs/download.php/file/33238/melt-2.0b4.tar.gz
-    (cd packages && curl -O "$url")
+    (cd /vagrant/packages && curl -O "$url")
 fi
 standard_install /usr/local/bin/MElt melt-2.0b4
 # MElt's -L option insists on this being readable for some reason.  We
 # don't care; we're in a VM anyway.
 sudo chown -R vagrant:vagrant /usr/local/share/melt/fr/lemmatization_data.db
 # Install our custom tools for interfacing with MElt.
+cd /vagrant
 sudo install extra/melt2conllx /usr/local/bin/
 sudo install extra/tag /usr/local/bin/
+
+# Download our French maltparser model.
+if [ ! -f /vagrant/packages/fremalt-1.7.mco ]; then
+    (cd /vagrant/packages &&
+        curl -O http://www.maltparser.org/mco/french_parser/fremalt-1.7.mco)
+fi
 
 # Install maltparser, which was never really meant to be installed.
 if [ ! -d /vagrant/maltparser-1.7.2 ]; then
@@ -68,6 +75,7 @@ if [ ! -d /vagrant/maltparser-1.7.2 ]; then
     tar xzf packages/maltparser-1.7.2.tar.gz
     cp packages/fremalt-1.7.mco maltparser-1.7.2/
 fi
+cd /vagrant
 sudo install extra/parse /usr/local/bin/
 
 # Install alexina (needed by LEFFF).
@@ -75,4 +83,3 @@ standard_install /usr/local/share/alexina alexina-tools-1.6
 
 # Install the LEFFF lexicon.
 standard_install /usr/local/share/lefff lefff-3.2
-
